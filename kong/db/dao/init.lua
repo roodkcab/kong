@@ -368,7 +368,7 @@ local function check_update(self, key, entity, options, name)
   end
 
   local rbw_entity
-  if read_before_write then
+  if read_before_write then -- this is currently always true
     local err, err_t
     if name then
        rbw_entity, err, err_t = self["select_by_" .. name](self, key, options)
@@ -431,26 +431,40 @@ local function check_update(self, key, entity, options, name)
 end
 
 
-local function check_upsert(self, entity, options, name, value)
-  local entity_to_upsert, err = self.schema:process_auto_fields(entity, "upsert")
+local function check_upsert(self, key, entity, options, name)
+  local entity_to_upsert, err, read_before_write =
+    self.schema:process_auto_fields(entity, "upsert")
   if not entity_to_upsert then
     local err_t = self.errors:schema_violation(err)
-    return nil, tostring(err_t), err_t
+    return nil, nil, tostring(err_t), err_t
+  end
+
+  local rbw_entity
+  if read_before_write then -- this is currently always true
+    local err, err_t
+    if name then
+       rbw_entity, err, err_t = self["select_by_" .. name](self, key, options)
+    else
+       rbw_entity, err, err_t = self:select(key, options)
+    end
+    if err then
+      return nil, nil, err, err_t
+    end
   end
 
   if name then
-    entity_to_upsert[name] = value
+    entity_to_upsert[name] = key
   end
 
   local ok, err, err_t = resolve_foreign(self, entity_to_upsert)
   if not ok then
-    return nil, err, err_t
+    return nil, nil, err, err_t
   end
 
   local ok, errors = self.schema:validate_upsert(entity_to_upsert, entity)
   if not ok then
     local err_t = self.errors:schema_violation(errors)
-    return nil, tostring(err_t), err_t
+    return nil, nil, tostring(err_t), err_t
   end
 
   if name then
@@ -460,14 +474,14 @@ local function check_upsert(self, entity, options, name, value)
   entity_to_upsert, err = self.schema:transform(entity_to_upsert, entity, "upsert")
   if not entity_to_upsert then
     err_t = self.errors:transformation_error(err)
-    return nil, tostring(err_t), err_t
+    return nil, nil, tostring(err_t), err_t
   end
 
   if options ~= nil then
     local ok, errors = validate_options_value(self, options)
     if not ok then
       local err_t = self.errors:invalid_options(errors)
-      return nil, tostring(err_t), err_t
+      return nil, nil, tostring(err_t), err_t
     end
   end
 
@@ -475,7 +489,7 @@ local function check_upsert(self, entity, options, name, value)
     entity_to_upsert.cache_key = self:cache_key(entity_to_upsert)
   end
 
-  return entity_to_upsert
+  return entity_to_upsert, rbw_entity
 end
 
 
@@ -721,8 +735,11 @@ local function generate_foreign_key_methods(schema)
           return nil, tostring(err_t), err_t
         end
 
-        local entity_to_upsert, err, err_t = check_upsert(self, entity, options,
-                                                          name, unique_value)
+        local entity_to_upsert, rbw_entity, err, err_t = check_upsert(self,
+                                                                      unique_value,
+                                                                      entity,
+                                                                      options,
+                                                                      name)
         if not entity_to_upsert then
           return nil, err, err_t
         end
@@ -738,7 +755,7 @@ local function generate_foreign_key_methods(schema)
           return nil, err, err_t
         end
 
-        self:post_crud_event("update", row, nil, options)
+        self:post_crud_event("update", row, rbw_entity, options)
 
         return row
       end
@@ -1016,7 +1033,10 @@ function DAO:upsert(primary_key, entity, options)
     return nil, tostring(err_t), err_t
   end
 
-  local entity_to_upsert, err, err_t = check_upsert(self, entity, options)
+  local entity_to_upsert, rbw_entity, err, err_t = check_upsert(self,
+                                                                primary_key,
+                                                                entity,
+                                                                options)
   if not entity_to_upsert then
     return nil, err, err_t
   end
@@ -1031,7 +1051,7 @@ function DAO:upsert(primary_key, entity, options)
     return nil, err, err_t
   end
 
-  self:post_crud_event("update", row, nil, options)
+  self:post_crud_event("update", row, rbw_entity, options)
 
   return row
 end

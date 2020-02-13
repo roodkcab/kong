@@ -3218,10 +3218,10 @@ describe("schema", function()
         }
       })
 
-      for _, operation in pairs{ "insert", "update", "select", "delete" } do
+      for _, operation in pairs{ "insert", "update", "select", "delete", "upsert" } do
         local assertion = assert.falsy
 
-        if operation == "update" then
+        if operation == "update" or operation == "upsert" then
           assertion = assert.truthy
         end
 
@@ -3235,7 +3235,7 @@ describe("schema", function()
       end
     end)
 
-    it("sets 'read_before_write' to false when not updating field type record", function()
+    it("sets 'read_before_write' to true when not updating field type record", function()
       local Test = Schema.new({
         name = "test",
         fields = {
@@ -3244,8 +3244,12 @@ describe("schema", function()
         }
       })
 
-      for _, operation in pairs{ "insert", "update", "select", "delete" } do
+      for _, operation in pairs{ "insert", "update", "select", "delete", "upsert" } do
         local assertion = assert.falsy
+
+        if operation == "update" or operation == "upsert" then
+          assertion = assert.truthy
+        end
 
         local _, _, process_auto_fields = Test:process_auto_fields({
           name = "cat"
