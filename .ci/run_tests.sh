@@ -22,13 +22,14 @@ fi
 
 if [ "$TEST_SUITE" == "integration" ]; then
     if [ "$TEST_SPLIT" == "first" ]; then
-        # GitHub Actions, run first half of integration tests
+        # GitHub Actions, run first batch of integration tests
         eval "$TEST_CMD" $(ls -d spec/02-integration/* | head -n4)
 
     elif [ "$TEST_SPLIT" == "second" ]; then
-        # GitHub Actions, run second half of integration tests
-        # In case of odd number of directories, the second half will be
-        # running one more directory than the first
+        # GitHub Actions, run second batch of integration tests
+        # Note that the split here is chosen carefully to result
+        # in a similar run time between the two batches, and should
+        # be adjusted if imbalance become significant in the future
         eval "$TEST_CMD" $(ls -d spec/02-integration/* | tail -n+5)
 
     else
