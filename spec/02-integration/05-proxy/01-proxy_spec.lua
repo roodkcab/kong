@@ -1,7 +1,6 @@
 local helpers = require "spec.helpers"
 local utils = require "pl.utils"
 local stringx = require "pl.stringx"
-local http = require "resty.http"
 
 
 local function count_server_blocks(filename)
@@ -45,34 +44,6 @@ describe("Proxy interface listeners", function()
     }))
     assert.equals(1, count_server_blocks(helpers.test_conf.nginx_kong_conf))
     assert.is_nil(get_listeners(helpers.test_conf.nginx_kong_conf).kong)
-  end)
-
-  it("multiple", function()
-    assert(helpers.start_kong({
-      proxy_listen = "127.0.0.1:9001, 127.0.0.1:9002",
-      admin_listen = "0.0.0.0:9000",
-    }))
-
-    assert.equals(2, count_server_blocks(helpers.test_conf.nginx_kong_conf))
-    assert.same({
-      ["127.0.0.1:9001"] = 1,
-      ["127.0.0.1:9002"] = 2,
-      [1] = "127.0.0.1:9001",
-      [2] = "127.0.0.1:9002",
-    }, get_listeners(helpers.test_conf.nginx_kong_conf).kong)
-
-    for i = 9001, 9002 do
-      local client = assert(http.new())
-      assert(client:connect("127.0.0.1", i))
-
-      local res = assert(client:request {
-        method = "GET",
-        path = "/"
-      })
-      res:read_body()
-      client:close()
-      assert.equals(404, res.status)
-    end
   end)
 end)
 
