@@ -2,10 +2,6 @@ name: Build & Test
 
 on: [push, pull_request]
 
-env:
-  KONG_SOURCE_LOCATION: $$GITHUB_WORKSPACE
-  KONG_BUILD_TOOLS_LOCATION: $HOME/kong-build-tools
-
 jobs:
   build:
     name: Build
@@ -61,18 +57,27 @@ jobs:
       run: pushd $KONG_BUILD_TOOLS_LOCATION && make test-kong && popd
 
   integration-tests-with-databases:
-    name: ${{matrix.database}} (${{ matrix.suite }}) integration tests
+    name: ${{matrix.database}} (${{ matrix.suite }}) ${{ matrix.split }} integration tests
     runs-on: ubuntu-18.04
     needs: build
 
     strategy:
       matrix:
+        split: [first, second, all]
         suite: [integration, plugins]
         database: [cassandra, postgres]
+        exclude:
+          - suite: plugins
+            split: first
+          - suite: plugins
+            split: second
+          - suite: integration
+            split: all
 
     env:
       KONG_TEST_DATABASE: ${{ matrix.database }}
       TEST_SUITE: ${{ matrix.suite }}
+      SPLIT: ${{ matrix.split }}
 
     steps:
     - name: Set env
