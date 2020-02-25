@@ -63,16 +63,16 @@ jobs:
 
     strategy:
       matrix:
-        split: [first, second, all]
-        suite: [integration, plugins]
-        database: [cassandra, postgres]
+        SPLIT: [first, second, all]
+        SUITE: [integration, plugins]
+        DATABASE: [cassandra, postgres]
         exclude:
-          - suite: plugins
-            split: first
-          - suite: plugins
-            split: second
-          - suite: integration
-            split: all
+          - SUITE: plugins
+            SPLIT: first
+          - SUITE: plugins
+            SPLIT: second
+          - SUITE: integration
+            SPLIT: all
 
     env:
       KONG_TEST_DATABASE: ${{ matrix.database }}
