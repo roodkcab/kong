@@ -94,7 +94,7 @@ jobs:
     - name: Run Tests
       run: pushd $KONG_BUILD_TOOLS_LOCATION && make test-kong && popd
 
-tests-without-a-database:
+  tests-without-a-database:
     name: Tests without a datastore
     runs-on: ubuntu-18.04
     needs: build
