@@ -700,11 +700,13 @@ describe("declarative config: process_auto_fields", function()
             {
               name = "my-credential",
               redirect_uris = { "https://example.com" },
+              hash_secret = false,
             },
             {
               name = "another-credential",
               consumer = "foo",
               redirect_uris = { "https://example.test" },
+              hash_secret = false,
             },
           }
         }, config)
@@ -755,10 +757,12 @@ describe("declarative config: process_auto_fields", function()
                   {
                     name = "my-credential",
                     redirect_uris = { "https://example.com" },
+                    hash_secret = false,
                   },
                   {
                     name = "another-credential",
                     redirect_uris = { "https://example.test" },
+                    hash_secret = false,
                   },
                 }
               }
@@ -784,7 +788,8 @@ describe("declarative config: process_auto_fields", function()
               {
                 name = "my-credential",
                 redirect_uris = { "https://example.com" },
-                oauth2_tokens = {}
+                oauth2_tokens = {},
+                hash_secret = false,
               },
             }
           }, config)
@@ -809,6 +814,7 @@ describe("declarative config: process_auto_fields", function()
               {
                 name = "my-credential",
                 redirect_uris = { "https://example.com" },
+                hash_secret = false,
                 oauth2_tokens = {
                   {
                     expires_in = 1,

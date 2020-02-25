@@ -11,6 +11,8 @@ description = {
   license = "Apache 2.0"
 }
 dependencies = {
+  "bcrypt == 2.1",
+  "argon2-ffi == 3.0.1",
   "inspect == 3.1.1",
   "luasec == 0.9",
   "luasocket == 3.0-rc1",
@@ -224,7 +226,9 @@ build = {
     ["kong.plugins.oauth2.migrations"] = "kong/plugins/oauth2/migrations/init.lua",
     ["kong.plugins.oauth2.migrations.000_base_oauth2"] = "kong/plugins/oauth2/migrations/000_base_oauth2.lua",
     ["kong.plugins.oauth2.migrations.003_130_to_140"] = "kong/plugins/oauth2/migrations/003_130_to_140.lua",
+    ["kong.plugins.oauth2.migrations.004_200_to_210"] = "kong/plugins/oauth2/migrations/004_200_to_210.lua",
     ["kong.plugins.oauth2.handler"] = "kong/plugins/oauth2/handler.lua",
+    ["kong.plugins.oauth2.secret"] = "kong/plugins/oauth2/secret.lua",
     ["kong.plugins.oauth2.access"] = "kong/plugins/oauth2/access.lua",
     ["kong.plugins.oauth2.schema"] = "kong/plugins/oauth2/schema.lua",
     ["kong.plugins.oauth2.daos"] = "kong/plugins/oauth2/daos.lua",
