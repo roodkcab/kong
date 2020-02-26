@@ -115,13 +115,17 @@ if [[ "$TEST_SUITE" =~ integration|dbless|plugins ]]; then
   docker run -d --name grpcbin -p 15002:9000 -p 15003:9001 moul/grpcbin
 fi
 
-psql -v ON_ERROR_STOP=1 --username "$KONG_TEST_PG_USER" <<-EOSQL
-    CREATE user postgres_ro;
+if [[ "$KONG_TEST_DATABASE" == "postgres" ]]; then
+  psql -v ON_ERROR_STOP=1 --username "$KONG_TEST_PG_USER" <<-EOSQL
+      CREATE user postgres_ro;
 
-    GRANT CONNECT ON DATABASE travis TO postgres_ro;
-    \c $KONG_TEST_PG_DATABASE;
-    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT ON TABLES TO postgres_ro;
+      GRANT CONNECT ON DATABASE travis TO postgres_ro;
+      \c $KONG_TEST_PG_DATABASE;
+      ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT ON TABLES TO postgres_ro;
+      \ddp
 EOSQL
+fi
+
 
 nginx -V
 resty -V
