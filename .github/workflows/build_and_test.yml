@@ -63,16 +63,16 @@ jobs:
 
     strategy:
       matrix:
-        SPLIT: [first, second, all]
-        SUITE: [integration, plugins]
-        DATABASE: [cassandra, postgres]
+        split: [first, second, all]
+        suite: [integration, plugins]
+        database: [cassandra, postgres]
         exclude:
           - SUITE: plugins
-            SPLIT: first
-          - SUITE: plugins
-            SPLIT: second
-          - SUITE: integration
-            SPLIT: all
+            split: first
+          - suite: plugins
+            split: second
+          - suite: integration
+            split: all
 
     env:
       KONG_TEST_DATABASE: ${{ matrix.database }}
@@ -97,7 +97,7 @@ jobs:
       run: make setup-kong-build-tools
 
     - name: Run Tests
-      run: pushd $KONG_BUILD_TOOLS_LOCATION && make test-kong && popd
+      run: pushd $KONG_BUILD_TOOLS_LOCATION && printenv && make test-kong && popd
 
   tests-without-a-database:
     name: Tests without a datastore
